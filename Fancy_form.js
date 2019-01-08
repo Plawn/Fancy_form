@@ -77,7 +77,9 @@ class Input {
         this.error_div;
     }
 
-
+    value(){
+        return this.input.value;
+    }
 
     set_error_type(err, type) {
         try {
