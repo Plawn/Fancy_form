@@ -20,6 +20,7 @@ class Form {
         this.send_func = settings.send_func || (() => { this.send() });
         this.button_text = settings.btn_txt || 'Send';
         this.button_classname = settings.classname || '';
+        this.submit = settings.submit || false;
         this.button;
     }
 
@@ -53,13 +54,17 @@ class Form {
         this.render_div.appendChild(f);
         const t = document.createElement('input');
         this.button = t;
-        t.type = 'button';
         t.value = this.button_text;
         t.className = this.button_classname;
-        t.onclick = () => {
-            const res = this.check();
-            if (res.ok) this.send_func();
-            else console.log('not validated cuz =>', res.errors);
+        if (!this.submit) {
+            t.type = 'button';
+            t.onclick = () => {
+                const res = this.check();
+                if (res.ok) this.send_func();
+                else console.log('not validated cuz =>', res.errors);
+            }
+        } else {
+            t.type = 'submit';
         }
         this.render_div.appendChild(t);
     }
