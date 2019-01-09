@@ -2,6 +2,7 @@
 // v 0.4
 // github => plawn
 
+
 Object.prototype.forEach = function (func) { //func can take value and/or key
     const t = this;
     Object.keys(t).forEach((key) => func(t[key], key));
@@ -15,8 +16,8 @@ class Form {
         this.inputs = [];
         this.render_div = render_div;
         if (this.render_div === undefined) throw new Error('container div not defined');
-        
-        this.send_func = settings.send_func || (() => { });
+
+        this.send_func = settings.send_func || (() => { this.send() });
         this.button_text = settings.btn_txt || 'Send';
         this.button_classname = settings.classname || '';
         this.button;
@@ -30,9 +31,26 @@ class Form {
         this.inputs.push(input);
     }
 
+    add_inputs(inputs) {
+        inputs.forEach(e => this.add_input(e));
+    }
+
+    toForm() {
+        const fd = new FormData();
+        this.inputs.forEach(e => fd.append(e.name(), e.value()));
+        return fd;
+    }
+
+    toJSON() {
+        const res = {};
+        this.inputs.forEach(e => res[e.name()] = e.value());
+        return res;
+    }
 
     render() {
-        this.inputs.forEach(input => this.render_div.appendChild(input.render()));
+        const f = document.createElement('form');
+        this.inputs.forEach(input => f.appendChild(input.render()));
+        this.render_div.appendChild(f);
         const t = document.createElement('input');
         this.button = t;
         t.type = 'button';
@@ -40,7 +58,7 @@ class Form {
         t.className = this.button_classname;
         t.onclick = () => {
             const res = this.check();
-            if (res.ok)  this.send_func();
+            if (res.ok) this.send_func();
             else console.log('not validated cuz =>', res.errors);
         }
         this.render_div.appendChild(t);
@@ -64,20 +82,26 @@ class Input {
     constructor(id, settings = {}) {
         this.id = id;
         this.checker = null;
+        this.setttings = settings;
         this.errors = {};
         this.className = settings.className || '';
         this.placeholder = settings.placeholder || '';
-        this.error_separator = '';
-        this.setttings = settings;
         this.type = settings.type || 'text';
+        this._name = settings.name || '';
+
+        this.error_separator = '';
         this.old_color = '';
-        
+
         this.bar;
         this.input;
         this.error_div;
     }
+    name() {
+        if (!this._name) throw new Error('name not set');
+        return this._name;
+    }
 
-    value(){
+    value() {
         return this.input.value;
     }
 

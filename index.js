@@ -4,11 +4,14 @@ const reg_mail = /.+@.+\..+/g;
 const form = new Form(div, () => alert('Success'));
 
 
-const input = new Input(5187);
+const input = new Input(5187,{
+    name:'deb'
+});
 const input2 = new Input('dbze', {
     placeholder: 'test',
     className: 'teb',
-    type: 'password'
+    type: 'password',
+    name:'YAY'
 });
 
 
