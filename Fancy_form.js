@@ -69,6 +69,42 @@ class Form {
         this.render_div.appendChild(t);
     }
 
+    load_from_JSON(obj) {
+        obj.forEach((elem, k) => this.add_input(new Input(k, { name: k, value: elem })));
+    }
+
+    add_checker_to_subtype(checker, subtype) {
+        this.inputs.forEach(input => {
+            if (input.sub_type == subtype) input.add_checker(checker);
+        });
+    }
+
+    _get_single(name) {
+        for (let i = 0; i < this.inputs.length; i++) {
+            if (this.inputs[i].name() == name) return this.inputs[i];
+        }
+        throw new Error('not found');
+    }
+    _get_multiple(names) {
+        const res = [];
+        for (let i = 0; i < this.inputs.length; i++) {
+            if (names.includes(this.inputs[i].name())) {
+                res.push(this.inputs[i]);
+                names.splice(i, 1);
+            }
+        }
+        return res;
+    }
+
+    get_named(arr) {
+        if (typeof (arr) == 'string') return this._get_single(arr);
+        else return this._get_multiple(arr);
+    }
+
+    add_after(input, index) {
+        this.inputs.splice(index, 0, input);
+    }
+
     check() {
         const errors = [];
         this.inputs.forEach(input => {
@@ -91,9 +127,10 @@ class Input {
         this.errors = {};
         this.className = settings.className || '';
         this.placeholder = settings.placeholder || '';
+        this._value = settings.value || '';
         this.type = settings.type || 'text';
         this._name = settings.name || '';
-
+        this.sub_type = settings.sub_type || 'base';
         this.error_separator = '';
         this.old_color = '';
 
@@ -104,6 +141,10 @@ class Input {
     name() {
         if (!this._name) throw new Error('name not set');
         return this._name;
+    }
+
+    set_value(val) {
+        this.input.value = val;
     }
 
     value() {
@@ -158,13 +199,8 @@ class Input {
         else this.change_color(this.old_color);
     }
     check() {
-        if (this.checker !== null) {
-            return this.checker.check(this, true);
-        }
-        return {
-            ok: true,
-            errors: []
-        };
+        if (this.checker !== null) return this.checker.check(this, true);
+        return { ok: true, errors: [] };
     }
 
 
@@ -183,7 +219,7 @@ class Input {
         this.input.id = this.id;
         this.input.placeholder = this.placeholder;
         this.input.style.width = '100%';
-        this.input.value = '';
+        this.input.value = this._value;
 
         [this.input, this.bar, this.error_div].forEach(elem => div.appendChild(elem));
 
