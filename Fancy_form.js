@@ -21,7 +21,7 @@ class Form {
         this.button_text = settings.btn_txt || 'Send';
         this.button_classname = settings.classname || '';
         this.submit = settings.submit || false;
-        this.button;
+        this.button = null;
     }
 
     set_end_function(func) {
@@ -97,9 +97,9 @@ class Input {
         this.error_separator = '';
         this.old_color = '';
 
-        this.bar;
-        this.input;
-        this.error_div;
+        this.bar = null;
+        this.input = null;
+        this.error_div = null;
     }
     name() {
         if (!this._name) throw new Error('name not set');
