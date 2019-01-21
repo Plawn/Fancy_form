@@ -5,7 +5,7 @@
 
 Object.prototype.forEach = function (func) { //func can take value and/or key
     const t = this;
-    Object.keys(t).forEach((key) => func(t[key], key));
+    Object.keys(t).forEach(key => func(t[key], key));
 }
 
 const count = (string, to_find) => (string.match(new RegExp(to_find, "g")) || []).length;
