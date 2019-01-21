@@ -152,23 +152,10 @@ class Input {
             if (val.set_err) set_err = true;
             if (val.err !== '') s += val.err + this.error_separator;
         })
-
-        // for (const key in this.errors) {
-        //     const t = this.errors[key].err;
-        //     if (this.errors[key].set_err) {
-        //         set_err = true;
-        //     }
-        //     if (t !== '') {
-        //         s += t + this.error_separator;
-        //     }
-        // }
         s = s.slice(0, -this.error_separator.length);
         this.error_div.innerText = s;
         if (s !== '' && set_err) this.set_error();
         else this.change_color(this.old_color);
-
-
-
     }
     check() {
         if (this.checker !== null) {
