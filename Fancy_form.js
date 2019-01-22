@@ -1,5 +1,5 @@
 // Writter Plawn
-// v 0.5
+// v 0.6
 // github => plawn
 
 
@@ -68,14 +68,12 @@ class Form {
         this.render_div.appendChild(t);
     }
 
-    load_from_JSON(obj, settings = { label_func: ((k) => k) }) {
-        obj.forEach((elem, k) => this.add_input(new Input(k, { name: k, value: elem, label: settings.label ? settings.label_func(k) : undefined })));
+    load_from_JSON(obj, settings = { labelize: k => k }) {
+        obj.forEach((elem, k) => this.add_input(new Input(k, { name: k, value: elem, label: settings.label ? settings.labelize(k) : undefined })));
     }
 
     add_checker_to_subtype(checker, subtype) {
-        this.inputs.forEach(input => {
-            if (input.sub_type == subtype) input.add_checker(checker);
-        });
+        this.inputs.forEach(input => { if (input.sub_type == subtype) input.add_checker(checker); });
     }
 
     _get_single(name) {
@@ -87,9 +85,10 @@ class Form {
     _get_multiple(names) {
         const res = {};
         for (let i = 0; i < this.inputs.length; i++) {
-            if (names.includes(this.inputs[i].name())) {
-                res[this.inputs[i].name()] = this.inputs[i];
-                names.splice(i - 1, 1);
+            const n = this.inputs[i].name();
+            if (names.includes(n)) {
+                res[n] = this.inputs[i];
+                names.splice(names.indexOf(n), 1);
             }
         }
         return res;
@@ -125,6 +124,7 @@ class Input {
         this.setttings = settings;
         this.errors = {};
         this.className = settings.className || '';
+        this.div_className = settings.div_className || '';
         this.placeholder = settings.placeholder || '';
         this._value = settings.value || '';
         this.type = settings.type || 'text';
@@ -210,6 +210,7 @@ class Input {
         this.error_div = document.createElement('div');
         this.input.disabled = this.is_disabled;
         const div = document.createElement('div');
+        div.className = this.div_className;
         div.style.display = 'block';
 
         this.bar = document.createElement('div');
@@ -227,12 +228,8 @@ class Input {
             p_lab.innerHTML = this.label;
             to_add.splice(0, 0, p_lab);
         }
-
-
         to_add.forEach(elem => div.appendChild(elem));
-
         this.input.type = this.type;
-
         return div;
     }
 }
