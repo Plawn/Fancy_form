@@ -21,6 +21,7 @@ class Form {
         this.button_text = settings.btn_txt || 'Send';
         this.button_classname = settings.classname || '';
         this.submit = settings.submit || false;
+        this.on_err_func = (res) => console.log('not validated cuz =>', res.errors);
         this.button = null;
     }
 
@@ -28,13 +29,10 @@ class Form {
         this.send_func = func;
     }
 
-    add_input(input) {
-        this.inputs.push(input);
-    }
+    reset() { this.inputs = []; this.render_div.innerHTML = ''; }
+    reset_container() { this.render_div.innerHTML = ''; }
 
-    add_inputs(inputs) {
-        inputs.forEach(e => this.add_input(e));
-    }
+    add_input(...input) { input.forEach(e => this.inputs.push(e)); }
 
     toForm() {
         const fd = new FormData();
@@ -49,6 +47,7 @@ class Form {
     }
 
     render() {
+        this.reset_container();
         const f = document.createElement('form');
         this.inputs.forEach(input => f.appendChild(input.render()));
         this.render_div.appendChild(f);
@@ -61,7 +60,7 @@ class Form {
             t.onclick = () => {
                 const res = this.check();
                 if (res.ok) this.send_func();
-                else console.log('not validated cuz =>', res.errors);
+                else this.on_err_func(res);
             }
         } else {
             t.type = 'submit';
@@ -69,8 +68,8 @@ class Form {
         this.render_div.appendChild(t);
     }
 
-    load_from_JSON(obj) {
-        obj.forEach((elem, k) => this.add_input(new Input(k, { name: k, value: elem })));
+    load_from_JSON(obj, settings = { label_func: ((k) => k) }) {
+        obj.forEach((elem, k) => this.add_input(new Input(k, { name: k, value: elem, label: settings.label ? settings.label_func(k) : undefined })));
     }
 
     add_checker_to_subtype(checker, subtype) {
@@ -86,11 +85,11 @@ class Form {
         throw new Error('not found');
     }
     _get_multiple(names) {
-        const res = [];
+        const res = {};
         for (let i = 0; i < this.inputs.length; i++) {
             if (names.includes(this.inputs[i].name())) {
-                res.push(this.inputs[i]);
-                names.splice(i, 1);
+                res[this.inputs[i].name()] = this.inputs[i];
+                names.splice(i - 1, 1);
             }
         }
         return res;
@@ -131,25 +130,26 @@ class Input {
         this.type = settings.type || 'text';
         this._name = settings.name || '';
         this.sub_type = settings.sub_type || 'base';
+        this.label = settings.label;
         this.error_separator = '';
         this.old_color = '';
 
         this.bar = null;
         this.input = null;
         this.error_div = null;
+        this.is_disabled = false;
     }
     name() {
         if (!this._name) throw new Error('name not set');
         return this._name;
     }
-
-    set_value(val) {
-        this.input.value = val;
+    disable() {
+        try { this.input.disabled = true; } catch (e) { this.is_disabled = true; }
     }
 
-    value() {
-        return this.input.value;
-    }
+    set_value(val) { this.input.value = val; }
+
+    value() { return this.input.value; }
 
     set_error_type(err, type) {
         try {
@@ -208,7 +208,7 @@ class Input {
         this.input = document.createElement("input");
         this.input.className = this.className;
         this.error_div = document.createElement('div');
-
+        this.input.disabled = this.is_disabled;
         const div = document.createElement('div');
         div.style.display = 'block';
 
@@ -216,12 +216,20 @@ class Input {
         this.bar.style.height = 0.45 + 'em';
         this.bar.style.width = 0 + '%';
         if (this.checker !== null && this.checker !== undefined) this.input.oninput = () => this.checker.check(this);
-        this.input.id = this.id;
+        if (this.id !== null) this.input.id = this.id;
         this.input.placeholder = this.placeholder;
         this.input.style.width = '100%';
         this.input.value = this._value;
 
-        [this.input, this.bar, this.error_div].forEach(elem => div.appendChild(elem));
+        const to_add = [this.input, this.bar, this.error_div];
+        if (this.label !== undefined) {
+            const p_lab = document.createElement('p');
+            p_lab.innerHTML = this.label;
+            to_add.splice(0, 0, p_lab);
+        }
+
+
+        to_add.forEach(elem => div.appendChild(elem));
 
         this.input.type = this.type;
 

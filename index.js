@@ -60,7 +60,7 @@ const c_div = document.getElementById('inscription_container');
 const f = new Form(c_div);
 
 
-f.load_from_JSON({name:'test', deb:'ja', mail:'paul.leveau@isep.fr'});
+f.load_from_JSON({name:'test', deb:'ja', mail:'paul.leveau@isep.fr'}, {label:true, label_func:(k)=>'1'+k});
 
 
 // f.add_checker_to_subtype(, 'base');
@@ -70,7 +70,7 @@ f.load_from_JSON({name:'test', deb:'ja', mail:'paul.leveau@isep.fr'});
 f.get_named('mail').add_checker(new Checker([new RuleLength(1,200), new RuleMatchRegExp(reg_mail)]));
 
 f.get_named(['name', 'deb']).forEach(elem => elem.add_checker(new Checker([new RuleLength(2,10)])))
-
+f.add_after(new Input(null, {placeholder:'test',label:'deb'}), 2);
 f.render();
 f.check();
 f.set_end_function(()=> alert('test'));
