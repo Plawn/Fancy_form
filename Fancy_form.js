@@ -21,7 +21,7 @@ class Form {
         this.button_text = settings.btn_txt || 'Send';
         this.button_classname = settings.classname || '';
         this.submit = settings.submit || false;
-        this.on_err_func = (res) => console.log('not validated cuz =>', res.errors);
+        this.on_err_func = settings.on_err_func || (res => console.log('not validated cuz =>', res.errors));
         this.button = null;
     }
 
