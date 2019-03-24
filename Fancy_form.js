@@ -15,19 +15,17 @@ class Form {
     constructor(render_div, settings = {}) {
         this.inputs = [];
         this.render_div = render_div;
-        if (this.render_div === undefined) throw new Error('container div not defined');
 
-        this.send_func = settings.send_func || (() => { this.send() });
+
+        this.send_func = settings.send_func || (() => { });
         this.button_text = settings.btn_txt || 'Send';
         this.button_classname = settings.classname || '';
         this.submit = settings.submit || false;
-        this.on_err_func = settings.on_err_func || (res => console.log('not validated cuz =>', res.errors));
+        this.on_err_func = settings.on_err_func || (res => console.log('not validated because =>', res.errors));
         this.button = null;
     }
 
-    set_end_function(func) {
-        this.send_func = func;
-    }
+    set_end_function(func) { this.send_func = func; }
 
     reset() { this.inputs = []; this.render_div.innerHTML = ''; }
     reset_container() { this.render_div.innerHTML = ''; }
@@ -47,10 +45,11 @@ class Form {
     }
 
     render() {
-        this.reset_container();
+        const d = document.createElement('div');
+        if (this.render_div)this.reset_container();
         const f = document.createElement('form');
         this.inputs.forEach(input => f.appendChild(input.render()));
-        this.render_div.appendChild(f);
+        d.appendChild(f);
         const t = document.createElement('input');
         this.button = t;
         t.value = this.button_text;
@@ -65,7 +64,9 @@ class Form {
         } else {
             t.type = 'submit';
         }
-        this.render_div.appendChild(t);
+        d.appendChild(t);
+        if (this.render_div) this.render_div.appendChild(d);
+        return d;
     }
 
     load_from_JSON(obj, settings = { labelize: k => k }) {
